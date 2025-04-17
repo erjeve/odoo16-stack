@@ -19,7 +19,12 @@ services:
       retries: 5
 
   odoo:
-    image: odoo:16
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        HOST_UID: ${HOST_UID}
+        HOST_GID: ${HOST_GID}
     container_name: odoo16
     depends_on:
       db:
