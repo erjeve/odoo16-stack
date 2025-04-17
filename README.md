@@ -6,60 +6,87 @@ A Git-managed, Portainer-friendly Docker stack for Odoo 16 Community Edition wit
 
 - Health checks for both Odoo and PostgreSQL
 - Custom `odoo.conf` via named volume or optional secure host override
-- Auto-pull OCA modules at runtime (if not present)
-- Named volumes for easy migration and persistence
-- Secure and reproducible Git-based deployment
+- Named volumes for data/config separation and persistence
+- OCA modules managed via host-mounted volume (`odoo_addons`)
 
 ## 🚀 Deployment Steps
 
-### 1. Prepare Volumes (Portainer Initial Setup)
+### 1. Create Volumes in Portainer (before first deploy)
 
-Before deploying this stack **via Portainer from Git**, you must manually create these volumes (or map them):
+Manually create these named volumes via Portainer UI:
 
 - `odoo_config`
 - `odoo_data`
 - `odoo_addons`
 - `odoo_db_data`
 
-You can do this in **Portainer → Volumes → Add Volume**.
+This avoids mount failures during stack initialization.
 
-### 2. Environment Variables Required
+### 2. Required Environment Variables
 
-In the stack UI, define the following:
+In Portainer → Stack UI:
 
-| Variable             | Example Value |
-|----------------------|---------------|
-| `ODOO_ADMIN_PASSWORD` | admin         |
-| `ODOO_DB_USER`        | odoo          |
-| `ODOO_DB_PASSWORD`    | odoo          |
-| `HOST_UID`            | 1026          |
-| `HOST_GID`            | 100           |
+| Name                  | Example     |
+|-----------------------|-------------|
+| `ODOO_ADMIN_PASSWORD` | `admin`     |
+| `ODOO_DB_USER`        | `odoo`      |
+| `ODOO_DB_PASSWORD`    | `odoo`      |
+| `HOST_UID`            | `1026`      |
+| `HOST_GID`            | `100`       |
 
-### 3. Optional Secure Host Config
+These align Odoo container permissions with Synology defaults.
 
-To override the Git-managed `odoo.conf` with one stored securely on your NAS:
+### 3. Optional: Override config via secure host path
+
+To replace the Git-managed config:
 
 ```yaml
 # - /volume1/docker/odoo/config:/etc/odoo:ro
 ```
 
-Create the config file manually at that path before deploying.
+Create the file manually at that path if needed.
 
-## 🧩 OCA Addons (Optional)
+---
 
-If not already mounted in the `odoo_addons` volume, the following will be auto-cloned at startup:
+## 🧩 Managing Addons via Volume (Recommended)
 
-- `l10n-netherlands`
-- `account-financial-tools`
-- `account-invoicing`
+Odoo loads external addons from the `odoo_addons` named volume mounted at `/mnt/extra-addons`.
+
+### Option A: Manual cloning
+
+```bash
+docker volume inspect odoo_addons
+# Locate the Mountpoint, e.g. /volume1/@docker/volumes/odoo_addons/_data
+
+cd /volume1/@docker/volumes/odoo_addons/_data
+git clone https://github.com/OCA/l10n-netherlands.git
+git clone https://github.com/OCA/account-financial-tools.git
+git clone https://github.com/OCA/account-invoicing.git
+```
+
+Then restart Odoo:
+
+```bash
+docker restart odoo16
+```
+
+### Option B: Use helper script
+
+Use the included `push-addons.sh` from your NAS:
+
+```bash
+chmod +x push-addons.sh
+./push-addons.sh
+```
+
+This script will pull or clone the OCA modules automatically into the volume.
+
+---
 
 ## 📍 Access
 
-Odoo should be available after deployment at:
-
-```
-http://<your-nas-ip>:8069
-```
+Odoo: `http://<your-nas-ip>:8069`  
+Use the web UI to initialize your first database.
 
 ## 📄 License
 

@@ -45,19 +45,6 @@ services:
       - odoo_addons:/mnt/extra-addons
       # Optional override:
       # - /volume1/docker/odoo/config:/etc/odoo:ro
-    command: >
-      sh -c "
-        if [ ! -d /mnt/extra-addons/l10n-netherlands ]; then
-          git clone https://github.com/OCA/l10n-netherlands.git /mnt/extra-addons/l10n-netherlands;
-        fi &&
-        if [ ! -d /mnt/extra-addons/account-financial-tools ]; then
-          git clone https://github.com/OCA/account-financial-tools.git /mnt/extra-addons/account-financial-tools;
-        fi &&
-        if [ ! -d /mnt/extra-addons/account-invoicing ]; then
-          git clone https://github.com/OCA/account-invoicing.git /mnt/extra-addons/account-invoicing;
-        fi &&
-        /entrypoint.sh odoo
-      "
     networks:
       - odoo-net
 
