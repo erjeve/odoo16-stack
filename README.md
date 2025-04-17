@@ -8,13 +8,14 @@ This repository provides a ready-to-use Odoo 16 Community Edition stack, optimiz
 - PostgreSQL 15
 - Support for custom addons via `./addons`
 - Configurable user UID/GID for Synology compatibility
+- Healthchecks and auto-restart policies
 
 ## 🚀 Quick Start (Local or GitHub → Portainer)
 
 1. Clone this repo or upload to your NAS:
 
 ```bash
-git clone https://github.com/<yourname>/odoo16-stack.git
+git clone https://github.com/yourname/odoo16-stack.git
 cd odoo16-stack
 ```
 
@@ -30,26 +31,31 @@ HOST_GID=100
 
 3. Deploy via Docker Compose or Portainer:
    - `docker-compose up -d`
-   - Or via Portainer using Git repository and environment variables
+   - Or use Portainer Git Stack with environment variables
 
-## 🧩 Custom Addons
+4. Access Odoo at `http://<your-nas-ip>:8069`
 
-Place your OCA or custom addons inside the `./addons` directory. Make sure `addons_path` in `config/odoo.conf` includes `/mnt/extra-addons`.
+## 🧩 Optional: Add OCA Modules or Custom Addons
 
-## 🔐 Permissions & Host Mapping
+To enhance your Odoo setup, you can clone popular community modules:
 
-This stack uses:
-
-```yaml
-user: "${HOST_UID}:${HOST_GID}"
+```bash
+git clone https://github.com/OCA/l10n-netherlands.git addons/l10n-netherlands
+git clone https://github.com/OCA/account-financial-tools.git addons/account-financial-tools
+git clone https://github.com/OCA/account-invoicing.git addons/account-invoicing
 ```
 
-To match Synology or your Linux user IDs for safe volume access.
+Then restart your Odoo container:
 
-## 📍 Default Access
+```bash
+docker-compose restart odoo
+```
 
-- Odoo: http://<your-nas-ip>:8069
-- Initial database setup via web UI
+## 📄 License
 
----
-MIT Licensed.
+This project is distributed under the MIT License.  
+See [LICENSE](LICENSE) for details.
+
+## 🙏 Credits
+
+Inspired in part by [MariusHosting](https://mariushosting.com/how-to-install-odoo-on-your-synology-nas/), adapted for Git-based Portainer deployments.

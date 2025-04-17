@@ -12,6 +12,11 @@ services:
       - db-data:/var/lib/postgresql/data
     networks:
       - odoo-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   odoo:
     image: odoo:16
@@ -21,6 +26,14 @@ services:
     ports:
       - "8069:8069"
     user: "${HOST_UID}:${HOST_GID}"
+    security_opt:
+      - no-new-privileges:true
+    restart: on-failure:5
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8069/", "||", "exit", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     environment:
       ODOO_ADMIN_PASSWORD: ${ODOO_ADMIN_PASSWORD}
       ODOO_DB_USER: ${ODOO_DB_USER}
@@ -31,6 +44,19 @@ services:
       - ./addons:/mnt/extra-addons
     networks:
       - odoo-net
+
+# ------------------------------------------------------------
+# 🧩 Optional: Add OCA Modules or Custom Addons
+# ------------------------------------------------------------
+# Clone these into ./addons/ before (re)starting your stack:
+#
+# git clone https://github.com/OCA/l10n-netherlands.git addons/l10n-netherlands
+# git clone https://github.com/OCA/account-financial-tools.git addons/account-financial-tools
+# git clone https://github.com/OCA/account-invoicing.git addons/account-invoicing
+#
+# After adding modules, run:
+# docker-compose restart odoo
+# ------------------------------------------------------------
 
 networks:
   odoo-net:
