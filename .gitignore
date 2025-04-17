@@ -1,0 +1,7 @@
+# Ignore runtime data
+db/
+data/
+addons/
+.env
+*.log
+__pycache__/

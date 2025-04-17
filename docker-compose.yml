@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:15
+    container_name: odoo-db
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: ${ODOO_DB_USER}
+      POSTGRES_PASSWORD: ${ODOO_DB_PASSWORD}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - odoo-net
+
+  odoo:
+    image: odoo:16
+    container_name: odoo16
+    depends_on:
+      - db
+    ports:
+      - "8069:8069"
+    user: "${HOST_UID}:${HOST_GID}"
+    environment:
+      ODOO_ADMIN_PASSWORD: ${ODOO_ADMIN_PASSWORD}
+      ODOO_DB_USER: ${ODOO_DB_USER}
+      ODOO_DB_PASSWORD: ${ODOO_DB_PASSWORD}
+    volumes:
+      - ./config:/etc/odoo
+      - ./data:/var/lib/odoo
+      - ./addons:/mnt/extra-addons
+    networks:
+      - odoo-net
+
+networks:
+  odoo-net:
+    driver: bridge
+
+volumes:
+  db-data:
+  odoo-data:
