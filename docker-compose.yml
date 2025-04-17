@@ -9,7 +9,7 @@ services:
       POSTGRES_USER: ${ODOO_DB_USER}
       POSTGRES_PASSWORD: ${ODOO_DB_PASSWORD}
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - odoo_db_data:/var/lib/postgresql/data
     networks:
       - odoo-net
     healthcheck:
@@ -22,7 +22,8 @@ services:
     image: odoo:16
     container_name: odoo16
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     ports:
       - "8069:8069"
     user: "${HOST_UID}:${HOST_GID}"
@@ -39,29 +40,33 @@ services:
       ODOO_DB_USER: ${ODOO_DB_USER}
       ODOO_DB_PASSWORD: ${ODOO_DB_PASSWORD}
     volumes:
-      - ./config:/etc/odoo
-      - ./data:/var/lib/odoo
-      - ./addons:/mnt/extra-addons
+      - odoo_config:/etc/odoo
+      - odoo_data:/var/lib/odoo
+      - odoo_addons:/mnt/extra-addons
+      # Optional override:
+      # - /volume1/docker/odoo/config:/etc/odoo:ro
+    command: >
+      bash -c "
+        if [ ! -d /mnt/extra-addons/l10n-netherlands ]; then
+          git clone https://github.com/OCA/l10n-netherlands.git /mnt/extra-addons/l10n-netherlands;
+        fi &&
+        if [ ! -d /mnt/extra-addons/account-financial-tools ]; then
+          git clone https://github.com/OCA/account-financial-tools.git /mnt/extra-addons/account-financial-tools;
+        fi &&
+        if [ ! -d /mnt/extra-addons/account-invoicing ]; then
+          git clone https://github.com/OCA/account-invoicing.git /mnt/extra-addons/account-invoicing;
+        fi &&
+        /entrypoint.sh odoo
+      "
     networks:
       - odoo-net
-
-# ------------------------------------------------------------
-# 🧩 Optional: Add OCA Modules or Custom Addons
-# ------------------------------------------------------------
-# Clone these into ./addons/ before (re)starting your stack:
-#
-# git clone https://github.com/OCA/l10n-netherlands.git addons/l10n-netherlands
-# git clone https://github.com/OCA/account-financial-tools.git addons/account-financial-tools
-# git clone https://github.com/OCA/account-invoicing.git addons/account-invoicing
-#
-# After adding modules, run:
-# docker-compose restart odoo
-# ------------------------------------------------------------
 
 networks:
   odoo-net:
     driver: bridge
 
 volumes:
-  db-data:
-  odoo-data:
+  odoo_config:
+  odoo_data:
+  odoo_addons:
+  odoo_db_data:
