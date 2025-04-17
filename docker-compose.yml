@@ -46,7 +46,7 @@ services:
       # Optional override:
       # - /volume1/docker/odoo/config:/etc/odoo:ro
     command: >
-      bash -c "
+      sh -c "
         if [ ! -d /mnt/extra-addons/l10n-netherlands ]; then
           git clone https://github.com/OCA/l10n-netherlands.git /mnt/extra-addons/l10n-netherlands;
         fi &&
