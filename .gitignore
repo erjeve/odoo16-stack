@@ -1,7 +1,21 @@
-# Ignore runtime data
-db/
+# 🔒 Secret or environment-specific files
+.env
+.env.*
+*.env
+
+# ✅ Keep env.example in repo
+!.env.example
+
+# 🔁 Runtime and build artefacts
+*.log
+*.pyc
+__pycache__/
+
+# 🗃️ Volume data (if someone syncs local volume folders)
 data/
 addons/
-.env
-*.log
-__pycache__/
+db/
+
+# 🔒 Optional config override path
+# config/odoo.conf
+/volume1/docker/odoo/config/odoo.conf

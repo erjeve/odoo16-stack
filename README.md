@@ -22,7 +22,30 @@ Manually create these named volumes via Portainer UI:
 
 This avoids mount failures during stack initialization.
 
-### 2. Required Environment Variables
+### 2. 👥 Determining UID:GID on Synology
+
+To ensure Odoo container can write to host-mounted volumes (like `odoo_data`), use:
+
+```bash
+id your-nas-username
+```
+
+This will output something like:
+
+```
+uid=1026(your-nas-username) gid=100(users)
+```
+
+Then in your `.env` or Portainer environment variables:
+
+```env
+HOST_UID=1026
+HOST_GID=100
+```
+
+These are passed to the container so file writes map correctly to the NAS filesystem.
+
+### 3. Required Environment Variables
 
 In Portainer → Stack UI:
 
@@ -34,9 +57,9 @@ In Portainer → Stack UI:
 | `HOST_UID`            | `1026`      |
 | `HOST_GID`            | `100`       |
 
-These align Odoo container permissions with Synology defaults.
+These align Odoo container permissions with Synology defaults. Adjust HOST_UID and HOST_GID too your system with the values aquired in stap 2.
 
-### 3. Optional: Override config via secure host path
+### 4. Optional: Override config via secure host path
 
 To replace the Git-managed config:
 
@@ -45,6 +68,28 @@ To replace the Git-managed config:
 ```
 
 Create the file manually at that path if needed.
+
+---
+
+## 🔐 Recommended Odoo Config Customization (odoo.conf)
+
+A minimal working `odoo.conf` file is included. It is designed to be mounted via:
+
+```yaml
+- /volume1/docker/odoo/config:/etc/odoo:ro
+```
+
+### Required setting
+
+- `admin_passwd`: this is the superadmin/master password Odoo uses during database creation.
+  - You **can** leave it as `admin` in development
+  - You **should** change it to a long secret in production
+  - This password is **not exposed publicly**, and is only used on first setup
+
+### Default values that are safe to keep
+
+- `addons_path`: includes both the official and extra-addons directories
+- `logfile`: logs go to `/var/log/odoo/odoo.log` (inside container)
 
 ---
 

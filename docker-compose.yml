@@ -40,11 +40,12 @@ services:
       ODOO_DB_USER: ${ODOO_DB_USER}
       ODOO_DB_PASSWORD: ${ODOO_DB_PASSWORD}
     volumes:
+      # Default volume (for Git-deployable setups)
       - odoo_config:/etc/odoo
+      # Optional host-based override (only used if ENV is set)
+      - ${ODOO_CONF_OVERRIDE:-null}
       - odoo_data:/var/lib/odoo
       - odoo_addons:/mnt/extra-addons
-      # Optional override:
-      # - /volume1/docker/odoo/config:/etc/odoo:ro
     networks:
       - odoo-net
 
