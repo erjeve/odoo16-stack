@@ -2,7 +2,7 @@ FROM odoo:16
 
 # Install required system tools for user management
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    passwd \
+    adduser \
     && rm -rf /var/lib/apt/lists/*
 
 
