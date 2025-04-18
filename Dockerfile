@@ -1,15 +1,21 @@
 FROM odoo:16
 
-# Install required system tools for user management
+# 👇 Force root inside the build container
+USER root
+
+# ✅ Install user tools now that we're root
 RUN apt-get update && apt-get install -y --no-install-recommends \
     adduser \
     && rm -rf /var/lib/apt/lists/*
 
-
-# Define build-time arguments	
+# Define build-time arguments for UID and GID	
 ARG HOST_UID
 ARG HOST_GID
 
-# Create a non-root user with specified UID:GID (e.g. Synology-compatible)
-RUN groupadd -g ${HOST_GID} appgroup && \
-    useradd -u ${HOST_UID} -g ${HOST_GID} -m -s /usr/sbin/nologin appuser
+# Add group if it doesn't exist
+RUN getent group ${HOST_GID} || groupadd -g ${HOST_GID} appgroup
+
+# Add user if it doesn't exist
+RUN id -u ${HOST_UID} || useradd -u ${HOST_UID} -g ${HOST_GID} -m -s /usr/sbin/nologin appuser
+
+USER odoo
