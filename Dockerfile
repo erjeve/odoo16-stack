@@ -1,12 +1,15 @@
 FROM odoo:16
 
-# Install user/group management tools
+# Install required system tools for user management
 RUN apt-get update && apt-get install -y --no-install-recommends \
     passwd \
     && rm -rf /var/lib/apt/lists/*
-	
+
+
+# Define build-time arguments	
 ARG HOST_UID
 ARG HOST_GID
 
-RUN groupadd -g ${HOST_GID} synogroup && \\
-    useradd -u ${HOST_UID} -g ${HOST_GID} synouser
+# Create a non-root user with specified UID:GID (e.g. Synology-compatible)
+RUN groupadd -g ${HOST_GID} appgroup && \
+    useradd -u ${HOST_UID} -g ${HOST_GID} -m -s /usr/sbin/nologin appuser
